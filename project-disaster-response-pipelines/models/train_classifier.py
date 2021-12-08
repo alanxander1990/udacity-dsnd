@@ -40,7 +40,8 @@ def load_data(database_filepath='..\data\DisasterResponse.db'):
     Y = df.iloc[:,4:]
     
     # mapping extra values to `1` since Y['related'] contains three distinct values
-    Y['related']=Y['related'].map(lambda x: 1 if x == 2 else x)
+    # this is already been handled in process_data.py
+#    Y['related']=Y['related'].map(lambda x: 1 if x == 2 else x)
     
     # get category columns names
     category_names = Y.columns
@@ -114,9 +115,10 @@ def build_model():
         ('clf', MultiOutputClassifier(AdaBoostClassifier()))
     ])
     # Create Grid search parameters
+    # Higher values for the n_estimators parameter might be a good idea (100-200).
     parameters = {
         'tfidf__use_idf': (True, False),
-        'clf__estimator__n_estimators': [50, 60, 70]
+        'clf__estimator__n_estimators': [100, 150, 200]
     }
 
     model = GridSearchCV(pipeline, param_grid=parameters, cv = 3, n_jobs = -1)

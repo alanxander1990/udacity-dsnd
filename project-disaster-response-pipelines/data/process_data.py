@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sqlalchemy import create_engine
 import sys
 
@@ -53,6 +54,13 @@ def clean_data(df):
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
     
+    # filter for columns contains value other than 0 and 1    
+    columns_non_binary = [col for col in categories if not np.isin(categories[col].unique(), [0, 1]).all()]
+    
+    # mapping extra values to `1`, in this case column 'related' contains three distinct values
+    for col in columns_non_binary:
+        categories[col] = categories[col].map(lambda x: 1 if (x!=0 and x!=1) else x)
+    
     # drop the original categories column from `df`
     df.drop('categories', axis=1, inplace = True)
     
@@ -76,7 +84,7 @@ def save_data(df, database_file_name='DisasterResponse.db'):
         None
     """
     engine = create_engine('sqlite:///{}'.format(database_file_name))
-    df.to_sql('disaster_response', engine, index=False)
+    df.to_sql('disaster_response', engine, if_exists='replace', index=False)
     
 def main():
     if len(sys.argv) == 4:
